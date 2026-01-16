@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion Notion</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 100%;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #1a1a1a;
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    #connect {
+      background: #000;
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    #connect:hover {
+      background: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #connect:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 20px;
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .error {
+      display: none;
+      margin-top: 20px;
+      padding: 12px;
+      background: #fee;
+      border: 1px solid #fcc;
+      border-radius: 8px;
+      color: #c33;
+    }
+
+    .error.active {
+      display: block;
+    }
+
+    .notion-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px;
+      background: #000;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="notion-logo">📓</div>
+    <h1>Connecter Notion</h1>
+    <p>Cliquez sur le bouton ci-dessous pour autoriser l'accès à votre workspace Notion.</p>
+    
+    <button id="connect">Connecter mon Notion</button>
+    
+    <div class="loading" id="loading">
+      Redirection en cours...
+    </div>
+    
+    <div class="error" id="error">
+      Une erreur est survenue. Veuillez réessayer.
+    </div>
+  </div>
+
+  <script>
+    // ⚠️ REMPLACE CES VALEURS PAR TES VRAIES URLS APPWRITE
+    const FUNCTION_URL = "https://APPWRITE_ENDPOINT/v1/functions/FUNCTION_ID_START/executions";
+
+    document.getElementById("connect").onclick = async () => {
+      const button = document.getElementById("connect");
+      const loading = document.getElementById("loading");
+      const error = document.getElementById("error");
+
+      // Reset UI
+      button.disabled = true;
+      loading.classList.add("active");
+      error.classList.remove("active");
+
+      try {
+        const res = await fetch(FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            source: "site"
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error("Erreur serveur");
+        }
+
+        const data = await res.json();
+
+        if (data.redirectUrl) {
+          // Redirection vers Notion OAuth
+          window.location.href = data.redirectUrl;
+        } else {
+          throw new Error("URL de redirection manquante");
+        }
+      } catch (err) {
+        console.error(err);
+        error.classList.add("active");
+        button.disabled = false;
+        loading.classList.remove("active");
+      }
+    };
+  </script>
+</body>
+</html>
