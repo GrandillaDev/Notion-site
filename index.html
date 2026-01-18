@@ -152,8 +152,9 @@
       if (!res.ok) {
         throw new Error("Erreur serveur lors de la création du user");
       }
-
-      const data = JSON.parse(res.json().responseBody);
+      const exec = res.json()
+      console.log(exec)
+      const data = JSON.parse(exec.responseBody);
       console.log(data)
       if (!data.url) {
         throw new Error("URL OAuth manquante dans la réponse");
