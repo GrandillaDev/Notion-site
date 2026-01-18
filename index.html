@@ -125,7 +125,7 @@
 
   <script>
     // ⚠️ REMPLACE CES VALEURS PAR TES VRAIES URLS APPWRITE
-    const FUNCTION_URL = "https://APPWRITE_ENDPOINT/v1/functions/FUNCTION_ID_START/executions";
+    const FUNCTION_URL = "https://fra.cloud.appwrite.io/v1/functions/696c9a1b00095410bd49/executions";
 
     document.getElementById("connect").onclick = async () => {
       const button = document.getElementById("connect");
@@ -138,35 +138,37 @@
       error.classList.remove("active");
 
       try {
-        const res = await fetch(FUNCTION_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            source: "site"
-          })
-        });
+      const res = await fetch(FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Appwrite-Project": "6968ea90000e9236d87c"
+        },
+        body: JSON.stringify({
+          source: "site"
+        })
+      });
 
-        if (!res.ok) {
-          throw new Error("Erreur serveur");
-        }
-
-        const data = await res.json();
-
-        if (data.redirectUrl) {
-          // Redirection vers Notion OAuth
-          window.location.href = data.redirectUrl;
-        } else {
-          throw new Error("URL de redirection manquante");
-        }
-      } catch (err) {
-        console.error(err);
-        error.classList.add("active");
-        button.disabled = false;
-        loading.classList.remove("active");
+      if (!res.ok) {
+        throw new Error("Erreur serveur lors de la création du user");
       }
+
+      const data = await res.json();
+
+      if (!data.url) {
+        throw new Error("URL OAuth manquante dans la réponse");
+      }
+
+      // Redirection vers Notion OAuth
+      window.location.href = data.url;
+
+    } catch (err) {
+      console.error(err);
+      error.classList.add("active");
+      button.disabled = false;
+      loading.classList.remove("active");
+    }
+
     };
   </script>
 </body>
