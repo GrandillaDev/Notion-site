@@ -108,6 +108,7 @@
 
       try {
         const res = await fetch("https://fra.cloud.appwrite.io/v1/functions/696ce6be0002f6bf3d20/executions", {
+          mode: "no-cors",
           method: "POST",
           headers: {
             "Content-Type": "application/json",
