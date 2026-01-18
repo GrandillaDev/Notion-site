@@ -153,7 +153,7 @@
         throw new Error("Erreur serveur lors de la création du user");
       }
 
-      const data = await res.json();
+      const data = JSON.parse(res.json().responseBody);
       console.log(data)
       if (!data.url) {
         throw new Error("URL OAuth manquante dans la réponse");
