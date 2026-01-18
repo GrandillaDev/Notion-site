@@ -94,45 +94,38 @@
     
     <a href="/" class="home-button">Retour à l'accueil</a>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
-<script>
-  const client = new Appwrite.Client()
-    .setEndpoint('https://fra.cloud.appwrite.io/v1')
-    .setProject('6968ea90000e9236d87');
-
-  const functions = new Appwrite.Functions(client);
-
+  <script>
   async function finishOAuth() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const state = params.get("state");
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const state = params.get("state");
 
-    if (!code || !state) {
-      document.querySelector("h1").textContent = "Erreur OAuth";
-      document.querySelector("p").textContent = "Paramètres manquants dans l'URL.";
-      return;
-    }
-
-    try {
-      const execution = await functions.createExecution(
-        '696ce6be0002f6bf3d20',
-        JSON.stringify({ code, userId: state }),
-        false
-      );
-
-      console.log('Succès:', execution);
-      
-      // Optionnel : rediriger après succès
-      // setTimeout(() => window.location.href = '/', 2000);
-
-    } catch (error) {
-      console.error('Erreur:', error);
-      document.querySelector("h1").textContent = "Erreur";
-      document.querySelector("p").textContent = "Une erreur est survenue lors de la connexion.";
-    }
+  if (!code || !state) {
+    console.error("Paramètres manquants");
+    return;
   }
 
-  finishOAuth();
+  try {
+    const res = await fetch("https://fra.cloud.appwrite.io/v1/functions/696ce6be0002f6bf3d20/executions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Appwrite-Project": "6968ea90000e9236d87"
+      },
+      body: JSON.stringify({ 
+        data: JSON.stringify({ code, userId: state })
+      })
+    });
+
+    const result = await res.json();
+    console.log('Succès:', result);
+
+  } catch (error) {
+    console.error('Erreur:', error);
+  }
+}
+
+finishOAuth();
 </script>
 </body>
 </html>
