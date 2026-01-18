@@ -108,7 +108,6 @@
 
       try {
         const res = await fetch("https://fra.cloud.appwrite.io/v1/functions/696ce6be0002f6bf3d20/executions", {
-          mode: "no-cors",
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -124,22 +123,9 @@
           throw new Error(data.error);
         }
 
-        // Succès
-        document.querySelector(".success-icon").textContent = "✓";
-        document.getElementById("status-title").textContent = "Connexion réussie !";
-        document.getElementById("status-text").textContent = "Votre compte Notion est maintenant connecté.";
-
-        // Ajoute un bouton retour si tu veux
-        const btn = document.createElement("a");
-        btn.href = "/";
-        btn.className = "home-button";
-        btn.textContent = "Retour à l'accueil";
-        document.getElementById("main-container").appendChild(btn);
-
       } catch (err) {
-        document.getElementById("status-title").textContent = "Erreur de connexion";
-        document.getElementById("status-text").textContent = err.message;
       }
+      throw new Error(err)
     }
 
     finishOAuth();
