@@ -154,7 +154,7 @@
       }
 
       const data = await res.json();
-
+      console.log(data)
       if (!data.url) {
         throw new Error("URL OAuth manquante dans la réponse");
       }
