@@ -94,5 +94,54 @@
     
     <a href="/" class="home-button">Retour à l'accueil</a>
   </div>
+  <script>
+    async function finishOAuth() {
+      const params = new URLSearchParams(window.location.search);
+      const code  = params.get("code");
+      const state = params.get("state"); // ton userId Appwrite
+
+      if (!code || !state) {
+        document.getElementById("status-title").textContent = "Erreur OAuth";
+        document.getElementById("status-text").textContent = "Paramètres manquants dans l'URL.";
+        return;
+      }
+
+      try {
+        const res = await fetch("https://cloud.appwrite.io/v1/functions/ID_DE_TA_FUNCTION/executions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Appwrite-Project": "TON_PROJECT_ID"
+          },
+          body: JSON.stringify({ code, userId: state })
+        });
+
+        const exec = await res.json();
+        const data = JSON.parse(exec.responseBody);
+
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        // Succès
+        document.querySelector(".success-icon").textContent = "✓";
+        document.getElementById("status-title").textContent = "Connexion réussie !";
+        document.getElementById("status-text").textContent = "Votre compte Notion est maintenant connecté.";
+
+        // Ajoute un bouton retour si tu veux
+        const btn = document.createElement("a");
+        btn.href = "/";
+        btn.className = "home-button";
+        btn.textContent = "Retour à l'accueil";
+        document.getElementById("main-container").appendChild(btn);
+
+      } catch (err) {
+        document.getElementById("status-title").textContent = "Erreur de connexion";
+        document.getElementById("status-text").textContent = err.message;
+      }
+    }
+
+    finishOAuth();
+  </script>
 </body>
 </html>
