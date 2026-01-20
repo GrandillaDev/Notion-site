@@ -116,13 +116,8 @@
           "X-Appwrite-Project": "6968ea90000e9236d87c"
         },
         body: JSON.stringify({ 
-          code: code,
-          userId: state
+         data: JSON.stringify({ code, userId: state })
         })
-        // OU si Appwrite attend vraiment "data" comme string :
-        // body: JSON.stringify({ 
-        //   data: JSON.stringify({ code, userId: state })
-        // })
       })
 
       const result = await res.json();
