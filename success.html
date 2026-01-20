@@ -116,18 +116,12 @@
         "X-Appwrite-Project": "6968ea90000e9236d87c"
       },
       body: JSON.stringify({ 
-        code: code,
-        userId: state
+        body: JSON.stringify({ code, userId: state })  // ← Changez "data" en "body"
       })
     });
 
     const result = await res.json();
     console.log('Réponse complète:', result);
-
-    // Optionnel : afficher un message d'erreur si ça échoue
-    if (result.error) {
-      console.error('Erreur Appwrite:', result);
-    }
 
   } catch (error) {
     console.error('Erreur:', error);
