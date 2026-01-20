@@ -96,39 +96,45 @@
   </div>
   <script>
   async function finishOAuth() {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const state = params.get("state");
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const state = params.get("state");
 
-    if (!code || !state) {
-      console.error("Paramètres manquants");
-      return;
-    }
-
-    console.log("Code:", code);
-    console.log("State (userId):", state);
-
-    try {
-      const res = await fetch("https://fra.cloud.appwrite.io/v1/functions/696ce6be0002f6bf3d20/executions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Appwrite-Project": "6968ea90000e9236d87c"
-        },
-        body: JSON.stringify({ 
-         data: JSON.stringify({ code, userId: state })
-        })
-      })
-
-      const result = await res.json();
-      console.log('Réponse complète:', result);
-
-    } catch (error) {
-      console.error('Erreur:', error);
-    }
+  if (!code || !state) {
+    console.error("Paramètres manquants");
+    return;
   }
 
-  finishOAuth();
+  console.log("Code:", code);
+  console.log("State (userId):", state);
+
+  try {
+    const res = await fetch("https://fra.cloud.appwrite.io/v1/functions/696ce6be0002f6bf3d20/executions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Appwrite-Project": "6968ea90000e9236d87c"
+      },
+      body: JSON.stringify({ 
+        code: code,
+        userId: state
+      })
+    });
+
+    const result = await res.json();
+    console.log('Réponse complète:', result);
+
+    // Optionnel : afficher un message d'erreur si ça échoue
+    if (result.error) {
+      console.error('Erreur Appwrite:', result);
+    }
+
+  } catch (error) {
+    console.error('Erreur:', error);
+  }
+}
+
+finishOAuth();
 </script>
 </script>
 </body>
