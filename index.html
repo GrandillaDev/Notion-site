@@ -43,6 +43,48 @@
       line-height: 1.6;
     }
 
+    .input-group {
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      color: #333;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .char-count.warning {
+      color: #f59e0b;
+    }
+
+    .char-count.error {
+      color: #ef4444;
+    }
+
     #connect {
       background: #000;
       color: white;
@@ -56,7 +98,7 @@
       width: 100%;
     }
 
-    #connect:hover {
+    #connect:hover:not(:disabled) {
       background: #333;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -110,9 +152,21 @@
   <div class="container">
     <div class="notion-logo">📓</div>
     <h1>Connecter Notion</h1>
-    <p>Cliquez sur le bouton ci-dessous pour autoriser l'accès à votre workspace Notion.</p>
+    <p>Choisissez votre pseudo et connectez votre workspace Notion.</p>
     
-    <button id="connect">Connecter mon Notion</button>
+    <div class="input-group">
+      <label for="pseudo">Pseudo</label>
+      <input 
+        type="text" 
+        id="pseudo" 
+        placeholder="Entrez votre pseudo" 
+        maxlength="32"
+        required
+      >
+      <div class="char-count" id="charCount">0 / 32</div>
+    </div>
+
+    <button id="connect" disabled>Connecter mon Notion</button>
     
     <div class="loading" id="loading">
       Redirection en cours...
@@ -124,13 +178,48 @@
   </div>
 
   <script>
-    // ⚠️ REMPLACE CES VALEURS PAR TES VRAIES URLS APPWRITE
     const FUNCTION_URL = "https://fra.cloud.appwrite.io/v1/functions/696c9a1b00095410bd49/executions";
 
-    document.getElementById("connect").onclick = async () => {
+    const pseudoInput = document.getElementById("pseudo");
+    const charCount = document.getElementById("charCount");
+    const connectButton = document.getElementById("connect");
+
+    // Gestion du compteur de caractères
+    pseudoInput.addEventListener("input", () => {
+      const length = pseudoInput.value.length;
+      charCount.textContent = `${length} / 32`;
+      
+      // Activation/désactivation du bouton
+      connectButton.disabled = length === 0;
+      
+      // Couleurs du compteur
+      charCount.classList.remove("warning", "error");
+      if (length > 28) {
+        charCount.classList.add("error");
+      } else if (length > 24) {
+        charCount.classList.add("warning");
+      }
+    });
+
+    // Connexion
+    connectButton.onclick = async () => {
       const button = document.getElementById("connect");
       const loading = document.getElementById("loading");
       const error = document.getElementById("error");
+      const pseudo = pseudoInput.value.trim();
+
+      // Validation
+      if (!pseudo || pseudo.length === 0) {
+        error.textContent = "Veuillez entrer un pseudo.";
+        error.classList.add("active");
+        return;
+      }
+
+      if (pseudo.length > 32) {
+        error.textContent = "Le pseudo ne peut pas dépasser 32 caractères.";
+        error.classList.add("active");
+        return;
+      }
 
       // Reset UI
       button.disabled = true;
@@ -138,39 +227,48 @@
       error.classList.remove("active");
 
       try {
-      const res = await fetch(FUNCTION_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Appwrite-Project": "6968ea90000e9236d87c"
-        },
-        body: JSON.stringify({
-          source: "site"
-        })
-      });
+        const res = await fetch(FUNCTION_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Appwrite-Project": "6968ea90000e9236d87c"
+          },
+          body: JSON.stringify({
+            body: JSON.stringify({ pseudo })
+          })
+        });
 
-      if (!res.ok) {
-        throw new Error("Erreur serveur lors de la création du user");
+        if (!res.ok) {
+          throw new Error("Erreur serveur lors de la création du user");
+        }
+
+        const exec = await res.json();
+        console.log(exec);
+        const data = JSON.parse(exec.responseBody);
+        console.log(data);
+
+        if (!data.url) {
+          throw new Error("URL OAuth manquante dans la réponse");
+        }
+
+        // Redirection vers Notion OAuth
+        window.location.href = data.url;
+
+      } catch (err) {
+        console.error(err);
+        error.textContent = err.message || "Une erreur est survenue. Veuillez réessayer.";
+        error.classList.add("active");
+        button.disabled = false;
+        loading.classList.remove("active");
       }
-      const exec = await res.json()
-      console.log(exec)
-      const data = JSON.parse(exec.responseBody);
-      console.log(data)
-      if (!data.url) {
-        throw new Error("URL OAuth manquante dans la réponse");
-      }
-
-      // Redirection vers Notion OAuth
-      window.location.href = data.url;
-
-    } catch (err) {
-      console.error(err);
-      error.classList.add("active");
-      button.disabled = false;
-      loading.classList.remove("active");
-    }
-
     };
+
+    // Permettre la soumission avec Enter
+    pseudoInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && !connectButton.disabled) {
+        connectButton.click();
+      }
+    });
   </script>
 </body>
 </html>
